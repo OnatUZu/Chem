@@ -3,7 +3,15 @@ import pandas as pd
 import random
 from difflib import SequenceMatcher
 
-data = pd.read_csv("Chem.csv")
+try:
+    data = pd.read_csv("Chem.csv")
+except FileNotFoundError:
+    st.warning("Chem.csv not found. Please upload the CSV file.")
+    uploaded = st.file_uploader("Upload Chem.csv", type="csv")
+    if uploaded:
+        data = pd.read_csv(uploaded)
+    else:
+        st.stop()
 
 name_col = "Element_Name"
 symbol_col = "Symbol"
@@ -35,7 +43,6 @@ if not st.session_state.started:
         st.session_state.results = []
         st.session_state.started = True
         st.experimental_rerun()
-
 else:
     i = st.session_state.index
     total = len(st.session_state.questions)
@@ -70,14 +77,13 @@ else:
 
             st.session_state.index += 1
             st.experimental_rerun()
-
     else:
         st.header("Quiz Complete")
         st.write(f"Your final score: {st.session_state.score}/{total}")
 
         if st.checkbox("Show all answers"):
-            for idx, (correct, value) in enumerate(st.session_state.results, 1):
-                icon = "Correct" if correct else "Incorrect"
+            for idx, (correct_flag, value) in enumerate(st.session_state.results, 1):
+                icon = "Correct" if correct_flag else "Incorrect"
                 st.write(f"{idx}. {value} - {icon}")
 
         if st.button("Play Again"):
